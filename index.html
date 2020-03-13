@@ -20,6 +20,14 @@
         </header>
         <div class="sr-container">
           <section class="container">
+		  <form id="myForm" action="//httpbin.org/post" method="POST">
+  <input type="text" id="amountInEuros" />
+  <input type="hidden" id="stripeToken" name="stripeToken" />
+  <input type="hidden" id="stripeEmail" name="stripeEmail" />
+  <input type="hidden" id="amountInCents" name="amountInCents" />
+</form>
+
+<input type="button" id="customButton" value="Pay">
             <h1>One-time rental payments</h1>
             <button data-sku-id="sku_Gu403cCsaiBWTX">Pay rent of € 1490.00 once</button>
             <button data-sku-id="sku_GU4KO8nfdg8G2Z">Pay rent of € 1990.00 once</button>
