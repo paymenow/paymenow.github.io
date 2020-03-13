@@ -32,7 +32,7 @@
     $(window).load(function(){
       
 var handler = StripeCheckout.configure({
-  key: 'pk_test_7zE1i7Spj4ahFtVeRGuEMnuU',
+  key: 'pk_live_7zE1i7Spj4ahFtVeRGuEMnuU',
   image: 'https://stripe.com/img/documentation/checkout/marketplace.png',
   token: function(token) {
     $("#stripeToken").val(token.id);
