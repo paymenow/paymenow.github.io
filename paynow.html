@@ -47,8 +47,8 @@ $('#customButton').on('click', function(e) {
   var displayAmount = parseFloat(Math.floor($("#amountInDollars").val() * 100) / 100).toFixed(2);
   // Open Checkout with further options
   handler.open({
-    name: 'Demo Site',
-    description: 'Custom amount ($' + displayAmount + ')',
+    name: 'Monthly Rental Payment',
+    description: 'Custom amount (€' + displayAmount + ')',
     amount: amountInCents,
   });
   e.preventDefault();
