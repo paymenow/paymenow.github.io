@@ -1,1 +1,571 @@
-done
+<!doctype html>
+<!--
+		____        __         ______
+	   / __ \__  __/ /___  __ / ____/___ __________ ___
+	  / / / / / / / __/ / / // /_  / __ `/ ___/ __ `__ \
+	 / /_/ / /_/ / /_/ /_/ // __/ / /_/ / /  / / / / / /
+	/_____/\__,_/\__/\__, //_/    \__,_/_/  /_/ /_/ /_/
+					/____/
+
+    Custom development by DUTYFARM.COM
+    https://www.dutyfarm.com
+    Berlin-based studio for games, gamification and digital experiences.
+	
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1633">
+<title>24/7 Games - Kostenlose Online-Spiele</title>
+<meta name="description" content="Kostenlose Online-Spiele direkt im Browser: Dice Master, Skat, Word Duel, Bubbleboo, XWord und mehr. Allein oder mit Freunden, auf Handy, Tablet und PC.">
+<style>
+:root{
+  --bg:#0d1b3d;
+  --bg-2:#112250;
+  --panel:#16295f;
+  --panel-2:#1d3577;
+  --text:#ffffff;
+  --muted:#a9b8e0;
+  --accent:#e2001a;
+  --accent-2:#ff3b52;
+  --focus:#ffd23f;
+  --radius:18px;
+  --side:232px;
+  --head:68px;
+  --gap:14px;
+  --cell:120px;
+  --cols:6;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.4;
+  -webkit-font-smoothing:antialiased;touch-action:manipulation;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Header */
+header{
+  position:fixed;inset:0 0 auto 0;height:var(--head);z-index:50;
+  display:flex;align-items:center;gap:18px;padding:0 max(20px,env(safe-area-inset-right)) 0 max(20px,env(safe-area-inset-left));
+  background:linear-gradient(180deg,#0a1633,#0d1b3d);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.3px;white-space:nowrap}
+.logo .mark{background:var(--accent);padding:4px 10px;border-radius:8px;font-size:21px;box-shadow:0 4px 14px rgba(226,0,26,.45)}
+.logo .sub{color:#fff;font-weight:800;font-size:24px}
+.search{flex:1;max-width:520px;margin-left:auto;position:relative;min-width:0}
+.search input{
+  width:100%;height:46px;border-radius:999px;border:2px solid transparent;
+  background:var(--panel);color:var(--text);padding:0 20px 0 48px;font-size:16px;
+  transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;
+}
+.search input::placeholder{color:var(--muted)}
+.search input:focus{outline:0;border-color:var(--accent-2);background:var(--panel-2)}
+.search svg{position:absolute;left:16px;top:50%;translate:0 -50%;width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2.4;stroke-linecap:round}
+
+
+/* Main */
+main{max-width:1400px;margin:0 auto;padding:calc(var(--head) + 22px) 24px 48px}
+.picker{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.pick{
+  flex:none;min-width:148px;height:68px;padding:0 20px 0 12px;border-radius:18px;
+  display:flex;align-items:center;gap:12px;font-weight:800;font-size:16px;text-align:left;color:#fff;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);opacity:.82;
+  transition:transform .15s,opacity .15s,box-shadow .15s;
+}
+.pick .pi{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.pick .pi svg{width:26px;height:26px}
+.pick .pt{font-weight:900;font-size:17px;line-height:1}
+.pick:hover{opacity:1;transform:translateY(-2px)}
+.pick[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 3px #fff,0 10px 22px rgba(0,0,0,.35);transform:translateY(-2px)}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 0 14px}
+.section-head h1,.section-head h2{font-size:22px;font-weight:800;letter-spacing:-.2px}
+.section-head p{color:var(--muted);font-size:14px}
+.legend{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin:-4px 0 14px}
+.mp-badge-demo{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;color:var(--accent);flex:none}
+.mp-badge-demo svg{width:16px;height:16px}
+
+/* Raster: Zellgröße wird per JS berechnet, damit 2x2 Kacheln immer quadratisch bleiben */
+.grid{
+  display:grid;gap:var(--gap);
+  grid-template-columns:repeat(var(--cols),var(--cell));
+  grid-auto-rows:var(--cell);
+  grid-auto-flow:dense;
+}
+.tile{
+  position:relative;border-radius:var(--radius);overflow:hidden;display:block;
+  background:var(--panel);isolation:isolate;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s;
+}
+.tile.big{grid-column:span 2;grid-row:span 2}
+.tile.wide{grid-column:span 2}
+.art{position:absolute;inset:0;z-index:-1}
+.art svg{width:100%;height:100%;display:block}
+.tile .name{
+  position:absolute;left:0;right:0;bottom:0;padding:26px 10px 9px;
+  font-weight:900;font-size:15px;line-height:1.12;letter-spacing:-.1px;text-shadow:0 1px 4px rgba(0,0,0,.6);
+  background:linear-gradient(0deg,rgba(6,12,32,.9),rgba(6,12,32,.55) 55%,rgba(6,12,32,0));
+}
+.tile.big .name{font-size:26px;padding:56px 16px 16px}
+.tile.wide .name{font-size:19px;padding:36px 14px 12px}
+.tag{
+  position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:999px;
+  background:var(--accent);font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase
+}
+.tag.top{background:#ffb703;color:#1b1500}
+.mp{
+  position:absolute;top:8px;right:8px;height:28px;min-width:28px;padding:0 6px;border-radius:999px;
+  background:#fff;color:var(--accent);display:flex;align-items:center;justify-content:center;gap:5px;
+  font-size:11px;font-weight:800;letter-spacing:.02em;box-shadow:0 3px 10px rgba(0,0,0,.35)
+}
+.mp svg{width:19px;height:19px;flex:none}
+.mp span{display:none}
+.tile.big .mp,.tile.wide .mp{height:32px;padding:0 12px 0 8px;top:10px;right:10px}
+.tile.big .mp span,.tile.wide .mp span{display:inline}
+@media (hover:hover){
+  .tile:hover,.tile:focus-visible{transform:scale(1.045);box-shadow:0 14px 30px rgba(0,0,0,.45);z-index:5}
+}
+.tile:active{transform:scale(.97)}
+
+.empty{display:none;text-align:center;padding:60px 20px;color:var(--muted)}
+.empty strong{display:block;color:#fff;font-size:20px;margin-bottom:6px}
+
+
+.about{margin-top:44px;padding:26px;border-radius:var(--radius);background:var(--bg-2);color:var(--muted);font-size:15px}
+.about h2{color:#fff;font-size:20px;margin-bottom:10px}
+.about p+p{margin-top:10px}
+
+/* Tablet und Handy */
+@media (max-width:860px){
+  :root{--gap:12px}
+  main{padding:calc(var(--head) + 16px) max(16px,env(safe-area-inset-right)) 32px max(16px,env(safe-area-inset-left))}
+  header{padding:0 max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));gap:12px}
+  .picker{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding:4px 16px 12px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:16px}
+  .picker::-webkit-scrollbar{display:none}
+  .pick{scroll-snap-align:start}
+}
+@media (max-width:480px){
+  :root{--gap:10px}
+  .logo{font-size:20px}.logo .mark{font-size:19px}.logo .sub{font-size:21px}
+  .section-head h1{font-size:20px}
+  .tile .name{font-size:14px;padding:22px 8px 8px}
+  .tile.big .name{font-size:21px}
+  .pick{min-width:136px;height:64px}
+  .about{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://track.dutylab.com/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '9']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+
+
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/" aria-label="24/7 Games Startseite"><span class="mark">24/7</span><span class="sub">Games</span></a>
+  <form class="search" role="search" onsubmit="return false">
+    <label class="sr" for="q">Spiele suchen</label>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="Spiele suchen" autocomplete="off" enterkeyhint="search">
+  </form>
+</header>
+
+<main id="main">
+  <nav class="picker" id="picker" aria-label="Spiele auswählen"></nav>
+
+  <div class="section-head">
+    <h1 id="title">Beliebte Spiele</h1>
+    <p id="count"></p>
+  </div>
+  <p class="legend"><span class="mp-badge-demo" id="legendIcon"></span> Dieses Symbol zeigt Spiele, die du zu zweit oder mit mehreren spielen kannst.</p>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty"><strong>Keine Treffer</strong>Versuche es mit einem anderen Suchbegriff oder wähle eine Kategorie.</div>
+
+  <div id="extra">
+        <section class="about">
+      <h2>Kostenlose Spiele direkt im Browser</h2>
+      <p>Auf 24/7 Games findest du Puzzle, Denksport, Wortspiele, Skat und spannende Duelle gegen andere Spieler. Alle Spiele laufen ohne Download und ohne Anmeldung auf Handy, Tablet und Computer.</p>
+      <p>Neue Spiele kommen laufend dazu. Mit der Auswahl oben und der Suche findest du schnell, worauf du gerade Lust hast.</p>
+	  <p>© 2026 Dutyfarm GmbH . We love the internet since 2001 . <a href="https://www.dutyfarm.com" target="_blank">Dutyfarm GmbH, Berlin</a> . <a href="https://www.dutyfarm.com/impressum/" target="_blank">Impressum</a></p>
+    </section>
+  </div>
+
+</main>
+
+<script>
+/* ---------- Symbole ---------- */
+const ICON_MP = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.6" fill="currentColor"/><path d="M1.5 20c0-4 3-6.4 6.5-6.4s6.5 2.4 6.5 6.4z" fill="currentColor"/><circle cx="17" cy="9" r="3" fill="currentColor" opacity=".7"/><path d="M15.6 14.2c.5-.1 1-.2 1.4-.2 3.2 0 5.5 2.2 5.5 6h-5.4c0-2.4-.6-4.3-1.5-5.8z" fill="currentColor" opacity=".7"/></svg>`;
+
+/* ---------- Daten (Reihenfolge = Sortierung der Startseite) ---------- */
+const CATS = [
+  {id:"puzzle",   name:"Puzzle",    c:["#7b5cff","#3b2bd6"]},
+  {id:"denksport",name:"Denksport", c:["#00b3a4","#0a6f8f"]},
+  {id:"wort",     name:"Wörter",    c:["#ff8a3d","#e0521b"]},
+  {id:"karten",   name:"Karten",    c:["#2fb55a","#0f7a3a"]},
+  {id:"geschick", name:"Geschick",  c:["#ffb703","#e07a00"]}
+];
+/* mp = Mehrspieler, a = Motiv, g = Hintergrundfarben */
+const GAMES = [
+  {n:"Dice Master",     u:"dicemaster",      c:"geschick", s:"big",  f:"top", mp:1, a:"dice",    g:["#ff9d2e","#c4177a"]},
+  {n:"Skat",            u:"skat",            c:"karten",   s:"",     f:"top", mp:1, a:"skat",    g:["#1fa85b","#0a5a3a"]},
+  {n:"Solitaire Klondike",u:"solitaire",   c:"karten",   s:"",     f:"neu",      a:"solitaire",g:["#5bd35b","#0d7a4a"]},
+  {n:"Word Duel",       u:"word-duel",       c:"duell",    s:"wide", f:"top", mp:1, a:"wordduel",g:["#8a4dff","#d8329b"]},
+  {n:"Bubbleboo",       u:"bubbleboo",       c:"puzzle",   s:"big",  f:"top",      a:"bubbleboo",g:["#35d0ff","#5a4bff"]},
+  {n:"Bubbleboo Duell", u:"bubbleboo-duell", c:"duell",    s:"",     f:"neu", mp:1, a:"bbduell", g:["#ff6fae","#4a63ff"]},
+  {n:"Hexa Mine",       u:"hexa-mine",       c:"denksport",s:"",     f:"neu", mp:1, a:"hexamine", g:["#2d3a8c","#e8505b"]},
+  {n:"Color Clash",     u:"colorclash",      c:"geschick", s:"",     f:"",    mp:1, a:"clash",   g:["#2b2f8f","#7a2cc0"]},
+  {n:"BuddyWords",      u:"buddywords",      c:"wort",     s:"",     f:"neu", mp:1, a:"buddy",   g:["#2fd3a1","#0a7a8f"]},
+  {n:"Sweets",          u:"sweets",          c:"puzzle",   s:"",     f:"",  mp:1,  a:"sweets",  g:["#ff7aa8","#ff9a3d"]},
+  {n:"Hexa Merge",      u:"hexa-merge",      c:"puzzle",   s:"",     f:"neu",      a:"hexamerge",g:["#ff7e5f","#6a3093"]},
+  {n:"Qbust",           u:"qbust",           c:"puzzle",   s:"",     f:"neu",      a:"qbust",   g:["#7b5cff","#ff5a7a"]},
+  {n:"Blitzblick",      u:"blitzblick",      c:"denksport",s:"wide",     f:"neu", mp:1, a:"eye",     g:["#12c4c0","#0f3d8f"]},
+  {n:"Professor IQ",    u:"professoriq",     c:"denksport",s:"",     f:"",         a:"prof",    g:["#3a7bff","#1b2f8f"]},
+  {n:"Ballerbutze",     u:"ballerbutze",     c:"geschick", s:"",     f:"",         a:"mega",    g:["#ff6a3d","#a8123a"]},
+  {n:"Bellyboo",        u:"bellyboo",        c:"geschick", s:"wide",     f:"",         a:"belly",   g:["#ff9ac4","#ffb86b"]},
+  {n:"XWord",           u:"xword",           c:"wort",     s:""    , f:"top",      a:"xword",   g:["#3a6bff","#7a3cc8"]}
+];
+
+/* ---------- Teaser-Grafiken (SVG, Szene in 100x100, Hintergrund füllt jede Kachelform) ---------- */
+const star=(x,y,s,fill="#fff",o=1)=>`<path d="M${x} ${y-s}Q${x} ${y} ${x+s} ${y}Q${x} ${y} ${x} ${y+s}Q${x} ${y} ${x-s} ${y}Q${x} ${y} ${x} ${y-s}Z" fill="${fill}" opacity="${o}"/>`;
+const face=(x,y,k=1,mood="happy")=>`
+  <g transform="translate(${x} ${y}) scale(${k})">
+    <circle cx="-7" cy="0" r="4.6" fill="#fff"/><circle cx="7" cy="0" r="4.6" fill="#fff"/>
+    <circle cx="-6.4" cy="0.6" r="2.4" fill="#1c1450"/><circle cx="7.6" cy="0.6" r="2.4" fill="#1c1450"/>
+    ${mood==="happy"
+      ? `<path d="M-5 8Q0 14 5 8" fill="none" stroke="#1c1450" stroke-width="2.4" stroke-linecap="round"/>`
+      : `<path d="M-5 11Q0 6 5 11" fill="none" stroke="#1c1450" stroke-width="2.4" stroke-linecap="round"/><path d="M-12 -6L-3 -3M12 -6L3 -3" stroke="#1c1450" stroke-width="2.4" stroke-linecap="round"/>`}
+  </g>`;
+const heart=(x,y,s,f)=>`<path transform="translate(${x} ${y}) scale(${s})" d="M0 -3C-6 -10 -12 -2 0 8C12 -2 6 -10 0 -3Z" fill="${f}"/>`;
+const spade=(x,y,s,f)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 3C-6 10 -12 2 0 -8C12 2 6 10 0 3Z" fill="${f}"/><path d="M-3 9L0 1L3 9Z" fill="${f}"/></g>`;
+const club=(x,y,s,f)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="${f}"><circle cx="0" cy="-5" r="4.6"/><circle cx="-5.2" cy="2" r="4.6"/><circle cx="5.2" cy="2" r="4.6"/><path d="M-3 9L0 0L3 9Z"/></g>`;
+
+const ART = {
+  dice:()=>`
+    <g transform="rotate(-14 36 62)">
+      <rect x="12" y="38" width="46" height="46" rx="11" fill="#fff"/>
+      <rect x="12" y="38" width="46" height="23" rx="11" fill="#fff4e0"/>
+      <g fill="#1c1450"><circle cx="24" cy="50" r="4.4"/><circle cx="46" cy="50" r="4.4"/><circle cx="35" cy="61" r="4.4"/><circle cx="24" cy="72" r="4.4"/><circle cx="46" cy="72" r="4.4"/></g>
+    </g>
+    <g transform="rotate(17 69 38)">
+      <rect x="50" y="18" width="38" height="38" rx="9" fill="#ff3b52"/>
+      <rect x="50" y="18" width="38" height="19" rx="9" fill="#ff6b7d"/>
+      <g fill="#fff"><circle cx="60" cy="28" r="3.7"/><circle cx="69" cy="37" r="3.7"/><circle cx="78" cy="46" r="3.7"/></g>
+    </g>
+    ${star(18,22,6,"#ffd23f")}${star(86,74,5,"#fff",.9)}${star(80,86,3,"#ffd23f")}`,
+
+  skat:()=>`
+    <g transform="rotate(-24 50 92)"><rect x="32" y="26" width="36" height="52" rx="6" fill="#fff"/>${heart(50,52,1.3,"#e2001a")}<text x="38" y="38" font-size="9" font-weight="900" fill="#e2001a" font-family="Segoe UI,Arial">B</text></g>
+    <g transform="rotate(24 50 92)"><rect x="32" y="26" width="36" height="52" rx="6" fill="#fff"/>${club(50,52,1.2,"#1c1450")}<text x="38" y="38" font-size="9" font-weight="900" fill="#1c1450" font-family="Segoe UI,Arial">K</text></g>
+    <g><rect x="32" y="22" width="36" height="52" rx="6" fill="#fff"/>${spade(50,50,1.5,"#1c1450")}<text x="37" y="34" font-size="10" font-weight="900" fill="#1c1450" font-family="Segoe UI,Arial">A</text></g>
+    ${star(16,20,5,"#ffd23f")}${star(86,24,4,"#fff",.8)}`,
+
+  solitaire:()=>{
+    const back=(x,y)=>`<g><rect x="${x}" y="${y}" width="24" height="32" rx="4" fill="#2b5fd9" stroke="#fff" stroke-width="1.6"/><rect x="${x+3.5}" y="${y+3.5}" width="17" height="25" rx="2.5" fill="none" stroke="#8fb2ff" stroke-width="1.2"/><path d="M${x+12} ${y+8}l6 8-6 8-6-8z" fill="#8fb2ff"/></g>`;
+    return `
+    ${back(10,26)}${back(10,32)}
+    <g><rect x="10" y="38" width="24" height="32" rx="4" fill="#fff"/><text x="14" y="49" font-size="9" font-weight="900" fill="#e2001a" font-family="Segoe UI,Arial">Q</text>${heart(22,58,.9,"#e2001a")}</g>
+    ${back(38,34)}
+    <g><rect x="38" y="42" width="24" height="32" rx="4" fill="#fff"/><text x="42" y="53" font-size="9" font-weight="900" fill="#1c1450" font-family="Segoe UI,Arial">A</text>${spade(50,62,.95,"#1c1450")}</g>
+    <g transform="rotate(8 78 40)"><rect x="66" y="20" width="24" height="32" rx="4" fill="#fff"/><text x="70" y="31" font-size="9" font-weight="900" fill="#e2001a" font-family="Segoe UI,Arial">K</text>${heart(78,40,.9,"#e2001a")}</g>
+    <g transform="rotate(-6 78 74)"><rect x="66" y="56" width="24" height="32" rx="4" fill="#fff"/><text x="70" y="67" font-size="9" font-weight="900" fill="#1c1450" font-family="Segoe UI,Arial">J</text>${club(78,77,.9,"#1c1450")}</g>
+    ${star(52,14,5,"#fff")}${star(90,92,4,"#ffd23f")}`;
+  },
+  hexamerge:()=>{
+    const hx=(cx,cy,r,fill,txt,tc)=>{
+      const pts=[0,1,2,3,4,5].map(k=>{const a=(Math.PI/180)*(60*k-30);return (cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)}).join(" ");
+      return `<polygon points="${pts}" fill="${fill}" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>`+
+             `<text x="${cx}" y="${cy+4.6}" font-size="${txt.length>2?9:txt.length>1?11:13}" font-weight="900" fill="${tc}" text-anchor="middle" font-family="Segoe UI,Arial">${txt}</text>`;
+    };
+    return hx(37,30,14,"#ffe08a","2","#1c1450")+hx(63,30,14,"#ffc24a","4","#1c1450")
+      +hx(24,52.5,14,"#ffc24a","4","#1c1450")+hx(50,52.5,14,"#ff8a3d","8","#fff")+hx(76,52.5,14,"#ff4f6a","16","#fff")
+      +hx(37,75,14,"#ffe08a","2","#1c1450")+hx(63,75,14,"#b86bff","32","#fff")
+      +star(88,22,5,"#fff")+star(12,82,4,"#ffd23f")+star(50,14,3.5,"#fff",.9);
+  },
+
+  hexamine:()=>{
+    const pts=(cx,cy,r)=>[0,1,2,3,4,5].map(k=>{const a=(Math.PI/180)*(60*k-30);return (cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)}).join(" ");
+    const cov=(cx,cy)=>`<polygon points="${pts(cx,cy,14)}" fill="#6f86ff" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><polygon points="${pts(cx,cy-1.2,10.5)}" fill="#9fb0ff"/>`;
+    const open=(cx,cy)=>`<polygon points="${pts(cx,cy,14)}" fill="#eef2ff" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>`;
+    const num=(cx,cy,t,c)=>`<text x="${cx}" y="${cy+5}" font-size="14" font-weight="900" fill="${c}" text-anchor="middle" font-family="Segoe UI,Arial">${t}</text>`;
+    const flag=(cx,cy,c)=>`<path d="M${cx-1.5} ${cy+8}V${cy-8}" stroke="#1c1450" stroke-width="2.2" stroke-linecap="round"/><path d="M${cx-1} ${cy-8}L${cx+9} ${cy-3.5}L${cx-1} ${cy+1}Z" fill="${c}"/>`;
+    return cov(37,30)+cov(63,30)
+      +open(24,52.5)+num(24,52.5,"1","#2f6bff")
+      +open(50,52.5)+`<g><circle cx="50" cy="52.5" r="6.4" fill="#1c1450"/><path d="M50 43.5v18M41 52.5h18M43.6 46.1l12.8 12.8M56.4 46.1L43.6 58.9" stroke="#1c1450" stroke-width="2" stroke-linecap="round"/><circle cx="47.8" cy="50.3" r="1.8" fill="#fff"/></g>`
+      +open(76,52.5)+num(76,52.5,"2","#e2001a")
+      +cov(37,75)+flag(37,75,"#e2001a")+cov(63,75)+flag(63,75,"#2f9bff")
+      +star(88,20,5,"#fff")+star(12,24,4,"#ffd23f");
+  },
+
+  wordduel:()=>`
+    <g transform="rotate(-9 28 52)"><rect x="10" y="28" width="36" height="42" rx="9" fill="#fff"/><text x="28" y="60" font-size="32" font-weight="900" fill="#6a3df0" text-anchor="middle" font-family="Segoe UI,Arial">W</text></g>
+    <g transform="rotate(9 72 52)"><rect x="54" y="28" width="36" height="42" rx="9" fill="#ffd23f"/><text x="72" y="60" font-size="32" font-weight="900" fill="#c01e72" text-anchor="middle" font-family="Segoe UI,Arial">D</text></g>
+    <circle cx="50" cy="50" r="12.5" fill="#e2001a" stroke="#fff" stroke-width="3"/>
+    <text x="50" y="54.5" font-size="12" font-weight="900" fill="#fff" text-anchor="middle" font-family="Segoe UI,Arial">VS</text>
+    <path d="M50 24l-3 8h6zM50 76l-3-8h6z" fill="#fff" opacity=".0"/>${star(50,18,6,"#fff")}${star(14,82,4,"#ffd23f")}${star(88,84,5,"#fff",.9)}`,
+
+  bubbleboo:(id)=>`
+    <defs><radialGradient id="${id}q" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#e8fbff"/><stop offset=".6" stop-color="#7fe3ff"/><stop offset="1" stop-color="#36a9ff"/></radialGradient></defs>
+    <circle cx="50" cy="55" r="29" fill="url(#${id}q)" stroke="#fff" stroke-width="2.5"/>
+    <ellipse cx="38" cy="38" rx="9" ry="5" transform="rotate(-35 38 38)" fill="#fff" opacity=".85"/>
+    ${face(50,57,1.25)}
+    <circle cx="22" cy="22" r="8" fill="#fff" opacity=".28" stroke="#fff" stroke-width="1.6"/>
+    <circle cx="82" cy="20" r="6" fill="#fff" opacity=".28" stroke="#fff" stroke-width="1.6"/>
+    <circle cx="85" cy="80" r="9" fill="#fff" opacity=".28" stroke="#fff" stroke-width="1.6"/>
+    <circle cx="14" cy="76" r="5" fill="#fff" opacity=".28" stroke="#fff" stroke-width="1.6"/>`,
+
+  bbduell:(id)=>`
+    <defs><radialGradient id="${id}p" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffe3f0"/><stop offset=".6" stop-color="#ff7fb5"/><stop offset="1" stop-color="#e0357e"/></radialGradient>
+    <radialGradient id="${id}b" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#e3ecff"/><stop offset=".6" stop-color="#7f9bff"/><stop offset="1" stop-color="#3547d8"/></radialGradient></defs>
+    <circle cx="29" cy="58" r="22" fill="url(#${id}p)" stroke="#fff" stroke-width="2.2"/>
+    <ellipse cx="21" cy="47" rx="6" ry="3.4" transform="rotate(-35 21 47)" fill="#fff" opacity=".85"/>
+    ${face(29,60,.95)}
+    <circle cx="71" cy="58" r="22" fill="url(#${id}b)" stroke="#fff" stroke-width="2.2"/>
+    <ellipse cx="63" cy="47" rx="6" ry="3.4" transform="rotate(-35 63 47)" fill="#fff" opacity=".85"/>
+    ${face(71,60,.95,"angry")}
+    <circle cx="50" cy="26" r="11" fill="#ffd23f" stroke="#fff" stroke-width="2.5"/>
+    <text x="50" y="30" font-size="11" font-weight="900" fill="#c01e72" text-anchor="middle" font-family="Segoe UI,Arial">VS</text>
+    ${star(14,20,5,"#fff",.9)}${star(88,22,5,"#fff",.9)}`,
+
+  clash:()=>`
+    <g transform="rotate(-8 30 30)"><rect x="12" y="12" width="32" height="32" rx="8" fill="#ff3b52"/><rect x="12" y="12" width="32" height="16" rx="8" fill="#ff7a8a"/></g>
+    <g transform="rotate(8 70 30)"><rect x="54" y="12" width="32" height="32" rx="8" fill="#2f9bff"/><rect x="54" y="12" width="32" height="16" rx="8" fill="#76c0ff"/></g>
+    <g transform="rotate(7 30 70)"><rect x="12" y="56" width="32" height="32" rx="8" fill="#ffd23f"/><rect x="12" y="56" width="32" height="16" rx="8" fill="#ffe785"/></g>
+    <g transform="rotate(-7 70 70)"><rect x="54" y="56" width="32" height="32" rx="8" fill="#2fd36b"/><rect x="54" y="56" width="32" height="16" rx="8" fill="#7be9a1"/></g>
+    <path d="M50 30l5 13 13-5-8 11 11 8-14 1 1 14-8-11-9 11 1-14-14-1 11-8-8-11 13 5z" fill="#fff"/>`,
+
+  buddy:()=>`
+    <g><path d="M12 22h46a8 8 0 0 1 8 8v14a8 8 0 0 1-8 8H30l-10 9v-9h-8a8 8 0 0 1-8-8V30a8 8 0 0 1 8-8z" transform="translate(2 0)" fill="#fff"/>
+      <g font-family="Segoe UI,Arial" font-weight="900" font-size="15" fill="#0a7a8f" text-anchor="middle"><text x="22" y="43">H</text><text x="38" y="43">A</text><text x="54" y="43">L</text></g></g>
+    <g><path d="M42 54h46a8 8 0 0 1 8 8v12a8 8 0 0 1-8 8h-8v9l-10-9H42a8 8 0 0 1-8-8V62a8 8 0 0 1 8-8z" transform="translate(-4 0)" fill="#ffd23f"/>
+      <g font-family="Segoe UI,Arial" font-weight="900" font-size="15" fill="#c26a00" text-anchor="middle"><text x="48" y="75">H</text><text x="64" y="75">I</text><text x="78" y="75">!</text></g></g>
+    ${heart(84,24,.9,"#fff")}${star(14,84,5,"#fff",.9)}`,
+
+  sweets:()=>`
+    <path d="M18 40L34 50L18 60Z" fill="#ffd23f"/><path d="M82 40L66 50L82 60Z" fill="#ffd23f"/>
+    <ellipse cx="50" cy="50" rx="21" ry="15" fill="#ff3b72"/>
+    <path d="M38 37q-6 13 0 26M50 35q-5 15 0 30M62 37q-6 13 0 26" stroke="#fff" stroke-width="4" fill="none" opacity=".85" stroke-linecap="round"/>
+    <ellipse cx="42" cy="42" rx="8" ry="3.4" transform="rotate(-20 42 42)" fill="#fff" opacity=".6"/>
+    <rect x="76" y="62" width="3.6" height="26" rx="1.8" fill="#fff" transform="rotate(18 77 74)"/>
+    <circle cx="74" cy="64" r="12" fill="#7b5cff" stroke="#fff" stroke-width="2.4"/>
+    <path d="M74 64m-2 0a2 2 0 1 1 4 0a5 5 0 1 1-8 0a8 8 0 1 1 12 0" fill="none" stroke="#fff" stroke-width="2.2"/>
+    <path d="M18 70l8-6 8 6-4 9h-8z" fill="#2fd3a1" stroke="#fff" stroke-width="1.8"/>${star(24,24,5,"#fff")}${star(84,24,4,"#ffd23f")}`,
+
+  qbust:()=>`
+    <polygon points="50,18 80,34 50,50 20,34" fill="#ffd9a0"/>
+    <polygon points="20,34 50,50 50,84 20,68" fill="#7b5cff"/>
+    <polygon points="50,50 80,34 80,68 50,84" fill="#4a2fd6"/>
+    <g transform="translate(24 40) skewY(28)"><text x="12" y="30" font-size="30" font-weight="900" fill="#fff" text-anchor="middle" font-family="Segoe UI,Arial">Q</text></g>
+    <g fill="#fff"><rect x="8" y="14" width="9" height="9" rx="2" transform="rotate(20 12 18)"/><rect x="84" y="12" width="8" height="8" rx="2" transform="rotate(-18 88 16)" fill="#ffd23f"/><rect x="86" y="76" width="9" height="9" rx="2" transform="rotate(25 90 80)"/><rect x="6" y="78" width="7" height="7" rx="2" transform="rotate(-22 9 81)" fill="#ffd23f"/></g>
+    ${star(86,46,4,"#fff")}`,
+
+  eye:(id)=>`
+    <g stroke="#fff" stroke-width="2.4" opacity=".28" stroke-linecap="round"><path d="M50 50L50 2M50 50L88 12M50 50L98 50M50 50L88 88M50 50L50 98M50 50L12 88M50 50L2 50M50 50L12 12"/></g>
+    <defs><radialGradient id="${id}i" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#7ef2ff"/><stop offset="1" stop-color="#1d6bff"/></radialGradient></defs>
+    <path d="M6 50Q50 10 94 50Q50 90 6 50Z" fill="#fff"/>
+    <circle cx="50" cy="50" r="21" fill="url(#${id}i)"/>
+    <circle cx="50" cy="50" r="21" fill="none" stroke="#0f3d8f" stroke-width="2.4"/>
+    <path d="M55 33L40 53h9l-4 15 16-22h-9z" fill="#ffd23f" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="42" cy="42" r="3.6" fill="#fff" opacity=".9"/>`,
+
+  prof:()=>`
+    <circle cx="50" cy="58" r="27" fill="#ffd9b3"/>
+    <polygon points="14,36 50,22 86,36 50,50" fill="#1c1450"/>
+    <path d="M30 44v10q20 10 40 0V44L50 52z" fill="#2b1f7a"/>
+    <path d="M86 36v18" stroke="#ffd23f" stroke-width="2.4"/><circle cx="86" cy="56" r="3" fill="#ffd23f"/>
+    <circle cx="40" cy="62" r="10" fill="#fff" stroke="#1c1450" stroke-width="3"/><circle cx="60" cy="62" r="10" fill="#fff" stroke="#1c1450" stroke-width="3"/>
+    <path d="M50 62h0" stroke="#1c1450" stroke-width="3"/><path d="M49 62q1-2 2 0" stroke="#1c1450" stroke-width="3" fill="none"/>
+    <circle cx="41" cy="63" r="3.6" fill="#1c1450"/><circle cx="61" cy="63" r="3.6" fill="#1c1450"/>
+    <path d="M42 77Q50 84 58 77" stroke="#1c1450" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    <rect x="58" y="12" width="26" height="14" rx="7" fill="#ffd23f"/><text x="71" y="22.5" font-size="10" font-weight="900" fill="#1c1450" text-anchor="middle" font-family="Segoe UI,Arial">IQ</text>
+    <circle cx="14" cy="18" r="7" fill="#ffd23f"/><path d="M14 8v-4M5 18H1M23 18h4M8 12L5 9M20 12l3-3" stroke="#ffd23f" stroke-width="2" stroke-linecap="round"/>${star(86,16,5,"#fff")}`,
+
+  truck:()=>`
+    <path d="M6 82h88" stroke="#fff" stroke-width="3" stroke-dasharray="8 6" opacity=".45" stroke-linecap="round"/>
+    <rect x="10" y="30" width="48" height="36" rx="5" fill="#fff"/>
+    <g fill="#ff9a2e"><rect x="15" y="36" width="16" height="12" rx="2"/><rect x="34" y="36" width="16" height="12" rx="2"/><rect x="24" y="51" width="16" height="12" rx="2"/></g>
+    <path d="M58 40h16l11 13v13H58z" fill="#ffd23f"/><path d="M63 44h9l7 9H63z" fill="#9ee8ff"/>
+    <circle cx="28" cy="68" r="8" fill="#1c1450"/><circle cx="28" cy="68" r="3.2" fill="#fff"/>
+    <circle cx="72" cy="68" r="8" fill="#1c1450"/><circle cx="72" cy="68" r="3.2" fill="#fff"/>
+    <path d="M18 18q16-12 32 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 5" stroke-linecap="round"/><path d="M52 14l-6-1 3 6z" fill="#fff"/>
+    <rect x="72" y="14" width="16" height="14" rx="2" fill="#ff9a2e" stroke="#fff" stroke-width="2"/>`,
+
+  mega:()=>{
+    const duck=(x,y)=>`<g><ellipse cx="${x}" cy="${y}" rx="7.5" ry="5.2" fill="#ffd23f"/><path d="M${x-7} ${y-1}q-3-3-1-6" stroke="#ffd23f" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="${x+5}" cy="${y-5.5}" r="4" fill="#ffd23f"/><path d="M${x+8.4} ${y-5.2}l4 1.2-4 1.6z" fill="#ff8a1f"/><circle cx="${x+5.6}" cy="${y-6.4}" r="1" fill="#1c1450"/><path d="M${x-3} ${y}q3 3 7 0" stroke="#e8a900" stroke-width="1.4" fill="none"/></g>`;
+    const stripes=[0,1,2,3,4,5].map(i=>`<rect x="${8+i*14}" y="8" width="14" height="18" fill="${i%2?"#fff":"#e2001a"}"/>`).join("");
+    const scallops=[0,1,2,3,4,5].map(i=>`<path d="M${8+i*14} 26a7 7 0 0 0 14 0z" fill="${i%2?"#fff":"#e2001a"}"/>`).join("");
+    const bulbs=["#ff4fd8","#ffd23f","#2fe0ff","#4dff7a","#ff4fd8","#ffd23f","#2fe0ff"].map((c,i)=>`<circle cx="${15+i*11.7}" cy="35.5" r="2.7" fill="${c}"/><circle cx="${15+i*11.7}" cy="35.5" r="5" fill="${c}" opacity=".25"/>`).join("");
+    return `
+    <rect x="8" y="26" width="84" height="40" fill="#6b1230" opacity=".6"/>
+    <rect x="6" y="8" width="3" height="80" rx="1.5" fill="#ffe0b8" opacity=".9"/><rect x="91" y="8" width="3" height="80" rx="1.5" fill="#ffe0b8" opacity=".9"/>
+    ${stripes}${scallops}${bulbs}
+    <rect x="12" y="62" width="76" height="3.4" rx="1.7" fill="#a66a2a"/>
+    ${duck(24,58)}${duck(42,58)}${duck(60,58)}
+    <circle cx="80" cy="50" r="10.5" fill="#fff" stroke="#e2001a" stroke-width="1.6"/><circle cx="80" cy="50" r="7.2" fill="#e2001a"/><circle cx="80" cy="50" r="4.2" fill="#fff"/><circle cx="80" cy="50" r="2" fill="#e2001a"/>
+    <path d="M80 61v4" stroke="#a66a2a" stroke-width="2.4"/>
+    <rect x="2" y="66" width="96" height="9" rx="2.5" fill="#d9954a"/><rect x="2" y="66" width="96" height="3.2" rx="1.6" fill="#f0b673"/>
+    <g stroke="#3dff7a" stroke-width="1.9" fill="none" stroke-linecap="round"><circle cx="58" cy="50" r="8.5"/><path d="M58 38v6M58 56v6M46 50h6M64 50h6"/></g><circle cx="58" cy="50" r="1.4" fill="#3dff7a"/>
+    <rect x="45.5" y="64" width="9" height="24" rx="3" fill="#1c1450"/><rect x="48.2" y="60" width="3.6" height="6" rx="1" fill="#1c1450"/><rect x="47" y="66" width="2" height="18" rx="1" fill="#fff" opacity=".25"/>
+    <rect x="38" y="82" width="24" height="16" rx="8" fill="#ffc9a0"/><path d="M44 84q6-3 12 0" stroke="#e7a678" stroke-width="1.6" fill="none"/>
+    ${star(14,20,0)}${star(88,76,4,"#fff",.9)}`;
+  },
+
+  belly:()=>`
+    <circle cx="30" cy="30" r="10" fill="#ff7fae"/><circle cx="70" cy="30" r="10" fill="#ff7fae"/>
+    <circle cx="30" cy="30" r="5" fill="#ffd0e2"/><circle cx="70" cy="30" r="5" fill="#ffd0e2"/>
+    <ellipse cx="50" cy="58" rx="31" ry="28" fill="#ff7fae"/>
+    <ellipse cx="50" cy="68" rx="19" ry="16" fill="#ffe3ee"/>
+    <ellipse cx="38" cy="86" rx="9" ry="5" fill="#e0589a"/><ellipse cx="62" cy="86" rx="9" ry="5" fill="#e0589a"/>
+    ${face(50,52,1.1)}
+    <circle cx="30" cy="62" r="4" fill="#ff4f93" opacity=".5"/><circle cx="70" cy="62" r="4" fill="#ff4f93" opacity=".5"/>
+    ${heart(86,22,.9,"#fff")}${heart(14,80,.7,"#fff")}`,
+
+  xword:()=>{
+    const L={"1,2":"S","2,2":"P","3,2":"I","4,2":"E","5,2":"L","2,0":"X","2,1":"W","2,3":"O","2,4":"R"};
+    const B=new Set(["0,0","0,1","4,0","5,0","0,3","1,4","4,4","5,4","0,2","1,0","5,1","4,1"]);
+    let s="";
+    for(let j=0;j<5;j++)for(let i=0;i<6;i++){
+      const k=i+","+j; const x=17+i*11, y=20+j*11;
+      if(B.has(k)) { if(L[k]===undefined) s+=`<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="#1c1450" opacity=".85"/>`; continue; }
+      const hit=L[k]!==undefined;
+      s+=`<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="${hit?"#ffd23f":"#fff"}"/>`;
+      if(hit) s+=`<text x="${x+5}" y="${y+7.8}" font-size="7.6" font-weight="900" fill="#1c1450" text-anchor="middle" font-family="Segoe UI,Arial">${L[k]}</text>`;
+    }
+    return s+`<g transform="rotate(38 82 80)"><rect x="76" y="58" width="8" height="34" rx="2" fill="#ff8a3d"/><path d="M76 92h8l-4 8z" fill="#ffe0b8"/><rect x="76" y="58" width="8" height="6" fill="#ff3b52"/></g>${star(12,12,5,"#fff")}`;
+  }
+};
+
+function bokeh(seed){
+  let h=0;for(const ch of seed)h=(h*31+ch.charCodeAt(0))|0;
+  const r=()=>{h=(h+0x6D2B79F5)|0;let t=Math.imul(h^h>>>15,1|h);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  let o="";
+  for(let i=0;i<16;i++)o+=`<circle cx="${(-70+r()*240).toFixed(1)}" cy="${(r()*100).toFixed(1)}" r="${(3+r()*10).toFixed(1)}" fill="#fff" opacity="${(.04+r()*.09).toFixed(2)}"/>`;
+  return o;
+}
+function artSVG(g){
+  const id="a"+g.u.replace(/\W/g,"");
+  const [a,b]=g.g;
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="${id}b" x1=".1" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>
+      <radialGradient id="${id}r" cx=".5" cy=".4" r=".11"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <filter id="${id}s" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2.5" stdDeviation="2.2" flood-color="#000" flood-opacity=".32"/></filter>
+    </defs>
+    <rect x="-400" y="-400" width="900" height="900" fill="url(#${id}b)"/>
+    <rect x="-400" y="-400" width="900" height="900" fill="url(#${id}r)"/>
+    ${bokeh(g.u)}
+    <g filter="url(#${id}s)">${ART[g.a](id)}</g>
+  </svg>`;
+}
+
+/* ---------- Rendering ---------- */
+const $ = s => document.querySelector(s);
+const catById = Object.fromEntries(CATS.map(c=>[c.id,c]));
+const state = {view:"alle", q:""};
+const VIEWS = {
+  alle:{label:"Beliebte Spiele", test:()=>true, icon:"A", color:"#e2001a"},
+  multi:{label:"Multiplayer", title:"Multiplayer-Spiele", test:g=>g.mp, svg:ICON_MP, color:"#7b5cff"},
+  neu:{label:"Neue Spiele", test:g=>g.f==="neu", icon:"N", color:"#2fb55a"},
+  top:{label:"Top-Spiele", test:g=>g.f==="top", icon:"T", color:"#ffb703"}
+};
+
+function tileHTML(g){
+  const cls = "tile" + (g.s ? " "+g.s : "");
+  const tag = g.f==="neu" ? '<span class="tag">Neu</span>' : g.f==="top" ? '<span class="tag top">Top</span>' : "";
+  const mp = g.mp ? `<span class="mp" title="Mehrspieler">${ICON_MP}<span>Multiplayer</span></span>` : "";
+  const label = g.n + (g.mp ? ", Mehrspieler" : "");
+  return `<a class="${cls}" href="https://games.dutyfarm.com/${g.u}" aria-label="${label} spielen">
+    <span class="art">${artSVG(g)}</span>${tag}${mp}<span class="name">${g.n}</span></a>`;
+}
+
+function render(){
+  const q = state.q.trim().toLowerCase();
+  const v = VIEWS[state.view];
+  const list = GAMES.filter(g=>{
+    const inView = v ? v.test(g) : g.c===state.view;
+    const inQ = !q || g.n.toLowerCase().includes(q) || (catById[g.c]?.name||"").toLowerCase().includes(q) || (q.includes("multi") && g.mp);
+    return inView && inQ;
+  });
+  $("#title").textContent = q ? `Suche: "${state.q.trim()}"` : (v ? (v.title||v.label) : catById[state.view].name);
+  $("#count").textContent = list.length + (list.length===1 ? " Spiel" : " Spiele");
+  $("#grid").innerHTML = list.map(tileHTML).join("");
+  $("#empty").style.display = list.length ? "none" : "block";
+    document.querySelectorAll("[data-view]").forEach(el=>{
+    const on = el.dataset.view===state.view && !q;
+    el.setAttribute("aria-pressed", on);
+  });
+  layout();
+}
+
+/* Zellgröße berechnen: 2x2-Kacheln bleiben exakt quadratisch, egal ob Handy, Tablet oder PC */
+function layout(){
+  const grid = $("#grid"), w = grid.clientWidth;
+  if(!w) return;
+  const gap = parseFloat(getComputedStyle(grid).columnGap) || 12;
+  const min = innerWidth<=480 ? 100 : innerWidth<=860 ? 118 : 140;
+  const cols = Math.max(3, Math.floor((w+gap)/(min+gap)));
+  const cell = (w - gap*(cols-1)) / cols;
+  grid.style.setProperty("--cols", cols);
+  grid.style.setProperty("--cell", cell.toFixed(2)+"px");
+}
+new ResizeObserver(layout).observe($("#grid"));
+
+function go(view){
+  state.view = view; state.q = ""; $("#q").value = "";
+  render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+const I = {
+  alle:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>`,
+  multi:ICON_MP,
+  neu:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L12 16.5 6.1 20l1.7-6.7L2.5 8.9l6.9-.5z"/></svg>`,
+  top:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H3v2a4 4 0 0 0 4 4M17 5h4v2a4 4 0 0 1-4 4" fill="none" stroke="currentColor" stroke-width="2"/><rect x="10.5" y="13" width="3" height="4"/><rect x="7" y="18" width="10" height="3" rx="1.5"/></svg>`,
+  puzzle:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="8" height="8" rx="2"/><rect x="11" y="12" width="8" height="8" rx="2" opacity=".7"/><rect x="11" y="4" width="8" height="8" rx="2"/></svg>`,
+  denksport:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><rect x="9" y="19" width="6" height="2.6" rx="1.3"/></svg>`,
+  wort:`<svg viewBox="0 0 24 24"><text x="12" y="17" font-size="15" font-weight="900" text-anchor="middle" fill="currentColor" font-family="Segoe UI,Arial">Aa</text></svg>`,
+  karten:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="11" height="15" rx="2.2" opacity=".6" transform="rotate(-12 8 12)"/><rect x="9" y="4" width="11" height="15" rx="2.2" transform="rotate(8 14 12)"/></svg>`,
+  duell:`<svg viewBox="0 0 24 24"><text x="12" y="17" font-size="14" font-weight="900" text-anchor="middle" fill="currentColor" font-family="Segoe UI,Arial">VS</text></svg>`,
+  geschick:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>`
+};
+function build(){
+  const items = Object.entries(VIEWS).map(([id,v])=>({id,label:v.label==="Beliebte Spiele"?"Alle Spiele":v.label,c:[v.color,v.color]}))
+    .concat(CATS.map(c=>({id:c.id,label:c.name,c:c.c})));
+  const col = {alle:["#ff3b52","#c4001a"],multi:["#8a6bff","#4a2fd6"],neu:["#3fd070","#0f8a3a"],top:["#ffc42e","#e07a00"]};
+  $("#picker").innerHTML = items.map(it=>{
+    const c = col[it.id]||it.c;
+    return `<button class="pick" data-view="${it.id}" aria-pressed="false" style="background:linear-gradient(135deg,${c[0]},${c[1]})"><span class="pi">${I[it.id]}</span><span class="pt">${it.label}</span></button>`;
+  }).join("");
+  $("#legendIcon").innerHTML = ICON_MP;
+  document.addEventListener("click",e=>{
+    const b = e.target.closest("[data-view]");
+    if(b) go(b.dataset.view);
+  });
+}
+
+$("#q").addEventListener("input",e=>{state.q=e.target.value;render()});
+
+build(); render();
+</script>
+</body>
+</html>
